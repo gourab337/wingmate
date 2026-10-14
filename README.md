@@ -1,10 +1,16 @@
 # wingmate
 
-**Drafts WhatsApp replies to the person you're dating, in your own voice. You read every draft and press Enter yourself.**
+**Drafts WhatsApp replies to the person you're dating, in your own voice. You choose: review every draft, or let it send.**
 
 wingmate watches one WhatsApp Web chat. When they text you, it writes a reply that sounds like you (learned from
-your real chat history) and types it into the message box. It never presses Enter. Delete the draft and it tries a
-different angle; send it, edit it, or ignore it.
+your real chat history). By default it types the draft into the message box and stops: send it, edit it, or delete
+it and it tries a different angle. Three modes:
+
+| Mode | What happens to a draft |
+| --- | --- |
+| `prefill` (default) | Typed into WhatsApp. You press Enter. |
+| `approve` | Shown in the terminal. Enter sends it, `e` edits, `s` skips. |
+| `auto` | Sent automatically after a random delay, within quiet hours and a daily cap. Escalations are never sent; you get a notification for those and for every message sent. |
 
 It's built to help you stay responsive and sound like yourself, not to replace you:
 
@@ -17,13 +23,15 @@ It's built to help you stay responsive and sound like yourself, not to replace y
 - **Remembers.** `data/facts.md` keeps track of what each of you has said, so drafts can call back to earlier messages
   and never contradict them. Sensitive topics (health, family, exes, grief) are deliberately left out.
 - **Paced like a person.** It waits until they've stopped sending, mirrors who usually starts conversations, and can suggest
-  an opener after a long silence (as a draft, never sent).
+  an opener after a long silence (a draft, except in `auto` mode).
 
 ## Before you use it
 
 - **WhatsApp's Terms of Service do not allow automated or unofficial clients.** wingmate drives WhatsApp Web in a
-  real browser and only types drafts, but WhatsApp can still restrict or ban accounts it thinks are automated. Use it
-  at your own risk.
+  real browser, but WhatsApp can still restrict or ban accounts it thinks are automated, and `auto` mode makes that
+  more likely. Use it at your own risk.
+- **In `auto` mode they're talking to a bot without knowing it.** Start with `prefill`, run `wingmate eval` and only
+  switch once the drafts are ones you'd send anyway. Check `data/log.jsonl` for what went out.
 - **Their messages are sent to an AI provider.** Your chat history and their new messages go to Anthropic through
   the `claude` CLI to write each draft. They haven't agreed to that. Depending on where you live (for example under
   the EU's GDPR) you may be responsible for that choice.
@@ -79,12 +87,12 @@ to "Approved lines" in `CLAUDE.md`. When one sounds wrong, add the phrase to `st
 | `names.me`, `names.them` | First names used in the prompts. |
 | `contact` | The chat name exactly as WhatsApp shows it. |
 | `dateOrder` | `dmy` (31/12/2026) or `mdy` (12/31/2026), matching WhatsApp's dates. `init` guesses from your system locale. |
-| `mode` | `prefill` types drafts into WhatsApp for you to send. `approve` shows each draft in the terminal; Enter sends it, `e` edits, `s` skips. |
+| `mode` | `prefill`, `approve` or `auto` (see the table at the top). |
 | `model`, `checkModel` | Claude models for drafting and for the fact check. |
 | `pollSeconds`, `debouncePolls` | How often to read the chat, and how many unchanged reads to wait so you answer a burst of messages once. |
-| `replyDelaySeconds` | `approve` mode only: random delay before sending, so replies aren't instant. |
-| `quietHours`, `maxSendsPerDay` | `approve` mode only: no sending in these hours, and a daily cap. |
-| `initiate` | Suggest an opener after `silenceHours` of quiet, between `windowStart` and `windowEnd`, at most once a day. |
+| `replyDelaySeconds` | `approve` and `auto`: random delay before sending, so replies aren't instant. |
+| `quietHours`, `maxSendsPerDay` | `approve` and `auto`: no sending in these hours, and a daily cap. |
+| `initiate` | Suggest an opener after `silenceHours` of quiet, between `windowStart` and `windowEnd`, at most once a day. In `auto` mode the opener is sent; set `enabled` to `false` to stop that. |
 
 ## What's in your folder
 

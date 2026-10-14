@@ -3,7 +3,7 @@
 <!-- Copy to CLAUDE.md. The whole file goes into the reply prompt. Keep it about real, non-sensitive things. -->
 
 Goal: <what you want from this conversation, e.g. a genuine connection>.
-The bot only drafts. You read every draft in the WhatsApp box and press Enter yourself.
+In prefill mode the bot only drafts and you press Enter; in auto mode it sends, so these rules are all that stands between it and the chat.
 Never deceive them about facts, invent things you haven't done, or manipulate their emotions.
 
 ## Why they're engaged

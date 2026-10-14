@@ -3,14 +3,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const HELP = `wingmate: drafts WhatsApp replies in your voice. You read every draft and press Enter yourself.
+const HELP = `wingmate: drafts WhatsApp replies in your voice, for you to send (prefill/approve) or sent for you (auto).
 
 Usage (run inside your wingmate folder):
   wingmate init      create config.json, CLAUDE.md, style.md, rules.md and data/ here
   wingmate login     open WhatsApp Web once to scan the QR code
   wingmate scrape    copy the chat history into data/history.json
   wingmate facts     build data/facts.md (what each of you has said) from the history
-  wingmate start     watch the chat and prefill drafts
+  wingmate start     watch the chat and draft (or send, in auto mode) replies
   wingmate eval [n]  backtest drafts against your real last n replies (default 20)`;
 
 // Same field order as WhatsApp on this machine: day first (31/12) or month first (12/31).

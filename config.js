@@ -7,7 +7,7 @@ const file = path.join(HOME, 'config.json');
 if (!fs.existsSync(file)) throw new Error(`No config.json in ${HOME}. Run "wingmate init" here first.`);
 const cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
 
-if (!['prefill', 'approve'].includes(cfg.mode)) throw new Error(`config.json: "mode" must be "prefill" or "approve", got ${JSON.stringify(cfg.mode)}`);
+if (!['prefill', 'approve', 'auto'].includes(cfg.mode)) throw new Error(`config.json: "mode" must be "prefill", "approve" or "auto", got ${JSON.stringify(cfg.mode)}`);
 if (!cfg.names?.me || !cfg.names?.them) throw new Error('config.json: set "names": { "me": ..., "them": ... }');
 if (!cfg.contact) throw new Error('config.json: set "contact" to the chat name exactly as WhatsApp shows it');
 if (!['dmy', 'mdy'].includes(cfg.dateOrder)) throw new Error('config.json: "dateOrder" must be "dmy" (31/12/2026) or "mdy" (12/31/2026), matching WhatsApp on your phone');

@@ -159,6 +159,7 @@ async function deliver(page, lines, mode, event, extra) {
   if (mode) state.modes = [...state.modes, mode].slice(-10);
   save();
   log({ event, sent: lines, mode, ...extra });
+  if (cfg.mode === 'auto') notify('Sent', lines.join(' / ')); // nobody reviewed it, so say what went out
   console.log('Sent.');
 }
 
@@ -191,14 +192,15 @@ async function reply(page, msgs, last) {
     const [reason, suggestion] = out.split('||').map((x) => x.trim());
     done(); log({ event: 'escalate', her: last.text, out });
     console.log(`\n!! NEEDS YOU: "${last.text}"\n   ${reason}`);
-    if (cfg.mode === 'prefill') return notify('Needs you', `${last.text.slice(0, 80)} | ${reason}`);
-    if (!suggestion || suggestion === 'NONE') return;
+    notify('Needs you', `${last.text.slice(0, 80)} | ${reason}`);
+    if (cfg.mode === 'prefill') return;
+    if (cfg.mode !== 'approve' || !suggestion || suggestion === 'NONE') return; // never auto-send on escalation
     console.log('   (optional minimal acknowledgement below; edit or skip)');
     lines = [suggestion];
   } else lines = out.split('\n').map((l) => l.trim()).filter(Boolean);
 
   if (cfg.mode === 'prefill') { done(); return offerDraft(page, msgs, lines, r.mode, key(last), 'prefilled'); }
-  lines = await approve(lines);
+  if (cfg.mode === 'approve') lines = await approve(lines);
   done();
   if (!lines) return log({ event: 'rejected', her: last.text, out });
   await deliver(page, lines, r.mode, 'sent', { her: last.text });
@@ -234,7 +236,7 @@ async function maybeInitiate(page, msgs) {
   let lines = r.text.split('\n').map((l) => l.trim()).filter(Boolean);
   console.log(`\n(Silence ${hours.toFixed(1)}h: drafting an opener)`);
   if (cfg.mode === 'prefill') return offerDraft(page, msgs, lines, r.mode, key(last), 'init-prefilled');
-  lines = await approve(lines);
+  if (cfg.mode === 'approve') lines = await approve(lines);
   if (!lines) return log({ event: 'init-rejected', out: r.text });
   await deliver(page, lines, r.mode, 'initiated', {});
 }
