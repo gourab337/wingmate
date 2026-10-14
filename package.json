@@ -1,15 +1,42 @@
 {
-  "name": "wa-agent",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
+  "name": "wingmate",
+  "version": "0.1.0",
+  "description": "Drafts WhatsApp replies to your date in your own voice. Nothing is sent without you reading it first.",
+  "keywords": [
+    "whatsapp",
+    "dating",
+    "claude",
+    "llm",
+    "texting",
+    "assistant"
+  ],
   "license": "ISC",
+  "author": "gourab337",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gourab337/wingmate.git"
+  },
   "type": "commonjs",
+  "bin": {
+    "wingmate": "bin/wingmate.js"
+  },
+  "files": [
+    "bin/",
+    "templates/",
+    "bot.js",
+    "config.js",
+    "eval.js",
+    "facts.js",
+    "reply.js",
+    "scrape-history.js",
+    "wa.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "postinstall": "playwright install firefox"
+  },
   "dependencies": {
     "playwright": "1.59.0"
   }

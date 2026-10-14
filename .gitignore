@@ -1,14 +1,21 @@
 node_modules/
 .DS_Store
 
+# Everything below is personal and lives only in the user's wingmate folder. Anchored to the root so the
+# blank copies in templates/ are still committed.
+
 # WhatsApp Web session (cookies, logins, keys): never commit
-profile/
+/profile/
 
 # Chat history, extracted facts, draft logs, bot state
-data/
+/data/
 
 # Personal prompt material (names, profiles, real chat quotes)
-CLAUDE.md
-config.json
-style.md
-rules.md
+/CLAUDE.md
+/config.json
+/style.md
+/rules.md
+
+# Bot control files
+/PAUSE
+/STOP

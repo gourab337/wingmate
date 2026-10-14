@@ -1,13 +1,23 @@
-const path = require('path');
 const { firefox } = require('playwright');
+const { at } = require('./config');
 
-async function launch() {
-  const context = await firefox.launchPersistentContext(path.join(__dirname, 'profile'), {
-    headless: false,
-    viewport: null,
-  });
+// The WhatsApp Web session lives in ./profile of the user's wingmate folder.
+async function openBrowser() {
+  const context = await firefox.launchPersistentContext(at('profile'), { headless: false, viewport: null });
   const page = context.pages()[0] || (await context.newPage());
   await page.goto('https://web.whatsapp.com');
+  return { context, page };
+}
+
+// First run: show WhatsApp Web so the user can scan the QR code. Resolves when they close the window.
+async function login() {
+  const { context } = await openBrowser();
+  console.log('WhatsApp Web is open. Scan the QR code, wait for your chats to load, then close the window.');
+  await new Promise((r) => context.on('close', r));
+}
+
+async function launch() {
+  const { context, page } = await openBrowser();
   await page.waitForSelector('#pane-side', { timeout: 0 }); // chat list = logged in
   await page.locator('#side input[aria-label="Search or start a new chat"]').waitFor({ state: 'visible', timeout: 60000 });
   await page.waitForTimeout(4000); // let WhatsApp finish its initial sync before we interact
@@ -53,7 +63,7 @@ async function readMessages(page, contact) {
       return [{
         reaction,
         dir: box.getAttribute('data-pre-plain-text').trim().endsWith(`] ${contact}:`) ? 'in' : 'out',
-        time: box.getAttribute('data-pre-plain-text'), // "[10:32 am, 11/10/2026] Name: "
+        time: box.getAttribute('data-pre-plain-text'), // "[10:32 am, 31/12/2026] Name: "
         text,
       }];
     }), contact
@@ -103,4 +113,4 @@ async function clearComposer(page) {
   await page.keyboard.press('Backspace');
 }
 
-module.exports = { launch, openChat, readMessages, scrollUp, send, composerText, prefill, clearComposer };
+module.exports = { login, launch, openChat, readMessages, scrollUp, send, composerText, prefill, clearComposer };

@@ -4,7 +4,7 @@ const { execFile } = require('child_process');
 const { launch, openChat, readMessages, send, composerText, prefill, clearComposer } = require('./wa');
 const { generate } = require('./reply');
 const { refreshFacts } = require('./facts');
-const cfg = require('./config.json');
+const { cfg, parseTime } = require('./config');
 
 const STATE = 'data/state.json';
 const state = Object.assign({ handled: null, day: '', sent: 0, modes: [], initDay: '' },
@@ -16,16 +16,8 @@ const key = (m) => `${m.time}|${m.text}`;
 const tty = process.stdin.isTTY;
 const rl = tty ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null;
 
-// "[1:31 pm, 11/10/2026] Name: " -> Date (WhatsApp shows dd/mm/yyyy in local time)
-function parseTime(s) {
-  const m = s.match(/\[(\d+):(\d+)\s*(am|pm),\s*(\d+)\/(\d+)\/(\d+)\]/i);
-  if (!m) return null;
-  let h = +m[1] % 12; if (m[3].toLowerCase() === 'pm') h += 12;
-  return new Date(+m[6], +m[5] - 1, +m[4], h, +m[2]);
-}
-
 // What the bot currently sees, so its state can be checked without opening a second browser.
-const status = (o) => fs.writeFileSync('data/status.json', JSON.stringify({ at: new Date().toLocaleString('en-AU'), ...o }, null, 1));
+const status = (o) => fs.writeFileSync('data/status.json', JSON.stringify({ at: new Date().toLocaleString(), ...o }, null, 1));
 
 // Grow data/history.json from what the bot sees live, so his real replies become examples for later drafts.
 const HIST = 'data/history.json';
@@ -51,8 +43,11 @@ function maybeRefreshFacts() {
     .finally(() => { refreshing = false; });
 }
 
-const notify = (title, body) =>
-  execFile('osascript', ['-e', `display notification ${JSON.stringify(body)} with title ${JSON.stringify(title)}`], () => {});
+// Desktop notification on macOS and Linux (notify-send); elsewhere the terminal output is the notification.
+const notify = (title, body) => {
+  if (process.platform === 'darwin') execFile('osascript', ['-e', `display notification ${JSON.stringify(body)} with title ${JSON.stringify(title)}`], () => {});
+  else if (process.platform === 'linux') execFile('notify-send', [title, body], () => {});
+};
 
 // Messages that appeared after the one with key `baseKey`, or null if that message is no longer loaded.
 function messagesSince(msgs, baseKey) {
@@ -197,13 +192,13 @@ async function reply(page, msgs, last) {
     done(); log({ event: 'escalate', her: last.text, out });
     console.log(`\n!! NEEDS YOU: "${last.text}"\n   ${reason}`);
     if (cfg.mode === 'prefill') return notify('Needs you', `${last.text.slice(0, 80)} | ${reason}`);
-    if (cfg.mode !== 'approve' || !suggestion || suggestion === 'NONE') return; // never auto-send on escalation
+    if (!suggestion || suggestion === 'NONE') return;
     console.log('   (optional minimal acknowledgement below; edit or skip)');
     lines = [suggestion];
   } else lines = out.split('\n').map((l) => l.trim()).filter(Boolean);
 
   if (cfg.mode === 'prefill') { done(); return offerDraft(page, msgs, lines, r.mode, key(last), 'prefilled'); }
-  if (cfg.mode === 'approve') lines = await approve(lines);
+  lines = await approve(lines);
   done();
   if (!lines) return log({ event: 'rejected', her: last.text, out });
   await deliver(page, lines, r.mode, 'sent', { her: last.text });
@@ -239,7 +234,7 @@ async function maybeInitiate(page, msgs) {
   let lines = r.text.split('\n').map((l) => l.trim()).filter(Boolean);
   console.log(`\n(Silence ${hours.toFixed(1)}h: drafting an opener)`);
   if (cfg.mode === 'prefill') return offerDraft(page, msgs, lines, r.mode, key(last), 'init-prefilled');
-  if (cfg.mode === 'approve') lines = await approve(lines);
+  lines = await approve(lines);
   if (!lines) return log({ event: 'init-rejected', out: r.text });
   await deliver(page, lines, r.mode, 'initiated', {});
 }
@@ -277,14 +272,15 @@ async function session() {
   }
 }
 
-module.exports = { openerDue, messagesSince, key, absorb };
-
 // Self-healing: if the browser closes or WhatsApp errors, wait and relaunch instead of dying.
-if (require.main === module) (async () => {
+async function start() {
+  if (!fs.existsSync(HIST)) throw new Error('No data/history.json yet. Run "wingmate scrape" first.');
   while (true) {
     try { await session(); }
     catch (e) { console.error(`Session error: ${e.message.split('\n')[0]}. Relaunching in 15s...`); log({ event: 'restart', error: e.message.split('\n')[0] }); }
     if (fs.existsSync('STOP')) { console.log('STOP file found, exiting.'); process.exit(0); }
     await sleep(15000);
   }
-})();
+}
+
+module.exports = { start, openerDue, messagesSince, key, absorb };

@@ -4,6 +4,7 @@
     "them": "TheirName"
   },
   "contact": "Contact name as shown in WhatsApp",
+  "dateOrder": "dmy",
   "pollSeconds": 10,
   "model": "sonnet",
   "quietHours": {

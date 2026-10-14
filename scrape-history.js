@@ -1,11 +1,12 @@
 const fs = require('fs');
 const { launch, openChat, readMessages, scrollUp } = require('./wa');
-const { contact } = require('./config.json');
+const { cfg: { contact } } = require('./config');
 
 const key = (m) => `${m.time}|${m.dir}|${m.text}`;
 
-(async () => {
+async function scrape() {
   const { context, page } = await launch();
+  fs.mkdirSync('data', { recursive: true });
   await openChat(page, contact);
   await page.waitForTimeout(4000);
 
@@ -32,4 +33,6 @@ const key = (m) => `${m.time}|${m.dir}|${m.text}`;
     console.log(`Saved ${all.length} messages to data/history.json`);
   }
   await context.close();
-})();
+}
+
+module.exports = { scrape };
