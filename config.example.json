@@ -1,0 +1,28 @@
+{
+  "names": {
+    "me": "YourName",
+    "them": "TheirName"
+  },
+  "contact": "Contact name as shown in WhatsApp",
+  "pollSeconds": 10,
+  "model": "sonnet",
+  "quietHours": {
+    "start": 1,
+    "end": 8
+  },
+  "maxSendsPerDay": 40,
+  "mode": "prefill",
+  "replyDelaySeconds": [
+    45,
+    240
+  ],
+  "debouncePolls": 3,
+  "initiate": {
+    "enabled": true,
+    "silenceHours": 10,
+    "windowStart": 9,
+    "windowEnd": 21,
+    "maxJitterMinutes": 180
+  },
+  "checkModel": "sonnet"
+}

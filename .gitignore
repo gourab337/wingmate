@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+
+# WhatsApp Web session (cookies, logins, keys): never commit
+profile/
+
+# Chat history, extracted facts, draft logs, bot state
+data/
+
+# Personal prompt material (names, profiles, real chat quotes)
+CLAUDE.md
+config.json
+style.md
+rules.md
