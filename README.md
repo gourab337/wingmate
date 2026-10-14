@@ -8,16 +8,16 @@ message box; a human reads every draft and presses Enter.
 ```bash
 npm install
 cp config.example.json config.json   # set names and the WhatsApp contact
+cp CLAUDE.example.md CLAUDE.md       # goals, voice, Known facts (fill in the <placeholders>)
+cp style.example.md style.md         # how you text
+cp rules.example.md rules.md         # reply rules; keep the MODE/SKIP/ESCALATE format lines
 node open.js                         # scan the QR code once; the session is kept in ./profile
 node scrape-history.js               # pulls the chat into data/history.json
 node facts.js                        # builds data/facts.md
 node bot.js
 ```
 
-The prompt files are personal and git-ignored, so create your own:
-
-- `CLAUDE.md`: goals, voice and a `## Known facts` section (read by `reply.js`)
-- `style.md`: how you text
-- `rules.md`: reply rules and output format
+`config.json`, `CLAUDE.md`, `style.md` and `rules.md` are personal and git-ignored; only the `*.example.*` templates
+are committed. `reply.js` reads the `## Known facts` section of `CLAUDE.md`, so keep that heading.
 
 `profile/` (logged-in WhatsApp session) and `data/` (chat history, logs) are git-ignored and must never be committed.
